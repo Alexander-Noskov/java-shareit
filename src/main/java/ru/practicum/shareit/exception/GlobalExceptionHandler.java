@@ -2,6 +2,7 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -12,11 +13,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(ConflictException.class)
+    @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorDto handleConflictException(final ConflictException e) {
+    public ErrorDto handleConflictException(final DataIntegrityViolationException e) {
         log.error("{} : {}", e.getClass().getSimpleName(), e.getMessage());
-        return new ErrorDto(409, e.getMessage());
+        return new ErrorDto(409, "This email address already exists");
     }
 
     @ExceptionHandler(NotFoundException.class)
@@ -40,6 +41,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingRequestHeaderException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDto handleBadRequest(final MissingRequestHeaderException e) {
+        log.error("{} : {}", e.getClass().getSimpleName(), e.getMessage());
+        return new ErrorDto(400, e.getMessage());
+    }
+
+    @ExceptionHandler(ValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDto handleBadRequest(final ValidException e) {
         log.error("{} : {}", e.getClass().getSimpleName(), e.getMessage());
         return new ErrorDto(400, e.getMessage());
     }
