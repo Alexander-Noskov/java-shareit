@@ -6,6 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CreateCommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithComments;
 
 import java.util.List;
 
@@ -19,6 +23,7 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
     private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -29,8 +34,8 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDto getItemById(@PathVariable Long itemId) {
-        return itemMapper.toItemDto(itemService.getItemById(itemId));
+    public ItemDtoWithComments getItemWithCommentsById(@PathVariable Long itemId) {
+        return itemService.getItemWithCommentsById(itemId);
     }
 
     @GetMapping
@@ -55,5 +60,13 @@ public class ItemController {
                               @PathVariable Long itemId,
                               @RequestBody ItemDto itemDto) {
         return itemMapper.toItemDto(itemService.updateItem(userId, itemId, itemMapper.toItem(itemDto)));
+    }
+
+    @PostMapping("/{itemId}/comment")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId,
+                                 @PathVariable Long itemId,
+                                 @RequestBody @Valid CreateCommentDto createCommentDto) {
+        return commentMapper.toCommentDto(itemService.addComment(userId, itemId, commentMapper.toComment(createCommentDto)));
     }
 }
